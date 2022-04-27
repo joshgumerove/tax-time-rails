@@ -1,13 +1,13 @@
-# class Api::ClientsController < ApplicationController
+class Api::ReturnsController < ApplicationController
 
-#     def index
-#         returns = Client.order('name')
-#         render json: {status: 'SUCCESS', message: 'LOADED CLIENTS', data: clients}
-#     end
+    def index
+        returns = Client.find_by('id').returns
+        render json: {status: 'SUCCESS', message: 'LOADED RETURNS', data: returns}
+    end
 
-#     def show
-#         client = Client.find_by('id')
-#         render json: {status: 'SUCCESS', message: 'LOADED CLIENT', data: client}
-#     end
+    def show
+        returns = Client.find_by('id').returns.find_by('id') #cannot use return as a variable
+        render json: {status: 'SUCCESS', message: 'LOADED CLIENT', data: returns}
+    end
 
-# end
+end
