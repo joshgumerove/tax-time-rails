@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2022_04_27_151358) do
+ActiveRecord::Schema.define(version: 2022_04_27_155857) do
 
   create_table "clients", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
@@ -18,4 +18,16 @@ ActiveRecord::Schema.define(version: 2022_04_27_151358) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "returns", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "time_estimate"
+    t.date "due_date"
+    t.string "return_type"
+    t.string "description"
+    t.bigint "client_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["client_id"], name: "index_returns_on_client_id"
+  end
+
+  add_foreign_key "returns", "clients"
 end
