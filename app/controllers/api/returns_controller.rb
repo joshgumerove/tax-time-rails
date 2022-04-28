@@ -12,7 +12,7 @@ class Api::ReturnsController < ApplicationController
 
     def client_returns
         returns = Return.all 
-        render json: {status: "SUCCESS", message: "LOADED RETURNS", data: returns}
+        render json: returns, except: [:created_at, :updated_at]
     end
 
 end
