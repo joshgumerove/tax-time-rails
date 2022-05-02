@@ -25,3 +25,5 @@ test:
 production:
   <<: *default
   database: tax
+# production:
+#   url: <%= ENV['DATABASE_URL'] %>
