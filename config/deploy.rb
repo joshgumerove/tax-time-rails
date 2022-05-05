@@ -1,5 +1,5 @@
 # config valid for current version and patch releases of Capistrano
-lock "~> 3.17.0"
+lock "~> 3.10.0"
 
 set :application, "tax-time-rails"
 set :repo_url, "https://github.com/joshgumerove/tax-time-rails"
@@ -8,7 +8,7 @@ set :repo_url, "https://github.com/joshgumerove/tax-time-rails"
 # ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
 
 # Default deploy_to directory is /var/www/my_app_name
-# set :deploy_to, "/var/www/my_app_name"
+set :deploy_to, "/home/joshgumerove/hackathon-project/tax-time"
 
 # Default value for :format is :airbrussh.
 # set :format, :airbrussh
@@ -17,23 +17,48 @@ set :repo_url, "https://github.com/joshgumerove/tax-time-rails"
 # These are the defaults.
 # set :format_options, command_output: true, log_file: "log/capistrano.log", color: :auto, truncate: :auto
 
-# Default value for :pty is false
-# set :pty, true
+#set :deploy_via, :remote_cache
+set :copy_exclude, [ '.git' ]
 
-# Default value for :linked_files is []
-append :linked_files, "config/database.yml", 'config/master.key'
+set(:config_files, %w(nginx.conf))
 
-# Default value for linked_dirs is []
-append :linked_dirs, "log", "tmp/pids", "tmp/cache", "tmp/sockets", "tmp/webpacker", "public/system", "vendor", "storage"
+set :linked_dirs, %w{ log }
+append :linked_files, "config/master.key"
 
-# Default value for default_env is {}
-# set :default_env, { path: "/opt/ruby/bin:$PATH" }
+# puma
+set :puma_preload_app, true
+set :puma_init_active_record, true
 
-# Default value for local_user is ENV['USER']
-# set :local_user, -> { `git config user.name`.chomp }
+namespace :puma do
+  desc "Create dirs for puma pids and socket"
+  task :make_dirs do
+    on roles(:app) do
+      execute "mkdir #{shared_path}/tmp/sockets -p"
+      execute "mkdir #{shared_path}/tmp/pids -p"
+    end
+  end
 
-# Default value for keep_releases is 5
-# set :keep_releases, 5
+  before :start, :make_dirs
+end
 
-# Uncomment the following to require manually verifying the host key before first deploy.
-# set :ssh_options, verify_host_key: :secure
+namespace :deploy do
+  desc "Make sure local git is in sync with remote"
+  task :check_revision do
+    on roles(:app) do
+      unless `git rev-parse HEAD` == `git rev-parse origin/#{fetch(:branch)}`
+        puts "WARNING: HEAD is not the same as origin/master"
+        exit
+      end
+    end
+  end
+
+  desc "Initial deploy"
+  task :initial do
+    on roles(:app) do
+      before 'deploy:restart', 'puma:start'
+      invoke 'deploy'
+    end
+  end
+
+  after :finishing, :cleanup
+end
