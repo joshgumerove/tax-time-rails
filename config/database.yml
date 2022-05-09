@@ -25,5 +25,6 @@ test:
 production:
   <<: *default
   database: tax
+  adapter: "postgresql"
 # production:
 #   url: <%= ENV['DATABASE_URL'] %>
